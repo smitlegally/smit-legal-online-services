@@ -1,0 +1,6 @@
+SMIT LEGAL FINAL V3 CORRECTED
+Build marker: SMIT_V3_FINAL_CORRECTED
+Admin save/chatbox sync event enabled.
+Invoice logo uses a deployment-safe URL.
+Payment QR, logo and business banner included.
+Note: automatic WhatsApp PDF attachment and shared multi-device database require backend/API support.

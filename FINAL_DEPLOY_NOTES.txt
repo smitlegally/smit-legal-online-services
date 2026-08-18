@@ -1,0 +1,12 @@
+Smit Legal V3 - FULLY SYNCED
+1. Admin services/sub-services/charges/documents save to V6 storage.
+2. Chatbox reads V6 first and reflects saved values.
+3. Service -> sub-service -> required documents -> charge -> accept flow active.
+4. Documents WhatsApp button active.
+5. PhonePe QR payment screen active.
+6. Payment reference submission and Admin confirmation + WhatsApp active.
+7. Order ID and tracking active.
+8. Invoice print includes Smit Legal logo cropped from the existing business banner.
+9. Invoice details can be shared through WhatsApp.
+10. Legacy V3/V4/V5 data is migrated/merged.
+Note: true shared multi-device database and automatic UPI verification require a backend/payment API.
