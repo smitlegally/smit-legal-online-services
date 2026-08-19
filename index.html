@@ -40,10 +40,22 @@
 @media(max-width:600px){.admin-order-row .order-grid{grid-template-columns:1fr}.smit-order-box{padding:19px}}
 
 </style>
-<style id="smit-final-admin-css">
-.admin-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 16px}.admin-tab{border:1px solid #ddd;background:#fff;border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer}.admin-tab.active{background:#5f20b8;color:#fff}
-.admin-service details{border:1px solid #e2e5ec;border-radius:13px;margin:8px 0;background:#fff}.admin-service details>summary{cursor:pointer;padding:12px;font-weight:900;list-style:none}.admin-service details>summary::-webkit-details-marker{display:none}.admin-service .admin-sub-card{margin:8px 0;padding:10px;border:1px solid #ececf1;border-radius:11px;background:#fafbff}.admin-service .compact-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.admin-service input,.admin-service textarea{box-sizing:border-box;width:100%;padding:8px;border:1px solid #d9dce5;border-radius:8px;font:inherit}.admin-service textarea{min-height:52px}.admin-help{font-size:12px;color:#6b7280}.fee-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.admin-settings-card{padding:12px;border:1px solid #e2e5ec;border-radius:13px}.admin-settings-card input{width:100%;box-sizing:border-box;padding:9px;border:1px solid #d9dce5;border-radius:8px}@media(max-width:600px){.fee-grid,.admin-service .compact-fields{grid-template-columns:1fr}}
-</style><script id="smit-final-config">window.SMIT_FINAL_CONFIG={displayEmail:"smitlegally@gmail.com",otpEnabled:false,defaultFees:{governmentFee:200,serviceCharge:200},languages:["mr","en","hi"]};</script></head>
+<style id="smit-admin-flow-fix">
+.modal-overlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex!important}
+.admin-modal{position:relative;width:min(680px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-close{position:absolute;right:10px;top:8px;border:0;background:transparent;font-size:28px;cursor:pointer}
+.flow-line{font-size:13px;color:#6b7280;margin-bottom:8px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.flow-line span{background:#f3f4f6;border-radius:999px;padding:5px 9px}
+.flow-title{font-weight:800;margin-bottom:12px}.flow-card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin-bottom:10px}
+</style>
+<style id="smit-service-sync-css">
+.service-card .service-flow-list{margin-top:10px;padding:10px 12px;border:1px solid #e7e7ef;border-radius:12px;background:#fafaff}
+.service-card .service-flow-list .flow-service-sub{font-weight:800;margin:7px 0}
+.service-card .service-flow-list .flow-service-opt{display:inline-block;margin:3px 5px 3px 0;padding:5px 8px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:12px}
+.service-card .service-flow-open{display:inline-flex;margin-top:8px;cursor:pointer;border:0;border-radius:9px;padding:8px 11px;font-weight:800}
+</style>
+</head>
 <body>
 
 <header class="topbar">
@@ -54,7 +66,7 @@
     </a>
     <div class="nav-actions">
       <button id="themeToggle" class="tool-btn" type="button" title="Dark / White Theme">🌙</button>
-      <button id="adminOpen" class="tool-btn admin-tool" type="button" title="Admin Panel" style="display:none">⚙️ Admin</button>
+      <button id="adminOpen" class="tool-btn admin-tool" type="button" title="Admin Panel">⚙️ Admin</button>
       <a class="call-mini" href="tel:9773330642">📞 Call</a>
       <a class="wa-mini" href="https://wa.me/919773330642" target="_blank" rel="noopener">WhatsApp</a>
     </div>
@@ -283,7 +295,7 @@ en:{
   services:[
     ["Government Services","Aadhaar, PAN, Birth/Death Certificate, Caste/Residence Certificate, Ayushman Bharat, e-Shram and Voter Card.",
       [["Aadhaar Services","New / Update / Correction","Aadhaar Card, registered mobile number, relevant supporting proof"],
-       ["PAN Card","New / Correction / Reprint","Select New, Correction or Reprint to see the exact charges and required documents."],
+       ["PAN Card","New PAN / Correction","Aadhaar Card, photo, mobile number, email"],
        ["Certificates","Birth / Death / Caste / Residence","ID proof, address or relevant supporting proof, mobile"],
        ["Ayushman Bharat / e-Shram","Registration / Update","Aadhaar Card, mobile number, relevant details"],
        ["Voter Card","New Registration / Correction","ID proof, address proof, photo"]]],
@@ -459,27 +471,20 @@ ensureUI(); render(localStorage.getItem("smitLang")||"en");
       <small>Authorized administrator access only.</small>
     </div>
     <div id="adminPanel" style="display:none">
-      <div class="admin-head"><div><h2>Admin</h2><p class="muted">Services • Orders • Settings</p></div><button id="adminLogout" class="secondary-btn" type="button">Logout</button></div>
-      <div class="admin-tabs">
-        <button type="button" class="admin-tab active" data-tab="services">Services</button>
-        <button type="button" class="admin-tab" data-tab="orders">Orders</button>
-        <button type="button" class="admin-tab" data-tab="settings">Settings</button>
-      </div>
-      <section id="adminTab-services"><div id="adminServices"></div></section>
-      <section id="adminTab-orders" style="display:none"><div id="adminOrders" class="admin-orders"></div><div id="adminTracking"></div><button id="addTracking" class="secondary-btn" type="button">＋ Add Tracking</button></section>
-      <section id="adminTab-settings" style="display:none">
-        <div class="admin-settings-card">
-          <label>WhatsApp Number<input id="adminWhatsapp" placeholder="919773330642"></label>
-          <div class="fee-grid">
-            <label>Government / Official Fee (₹)<input id="adminGovFee" type="number" min="0" value="200"></label>
-            <label>Smit Service Charge (₹)<input id="adminServiceFee" type="number" min="0" value="200"></label>
-          </div>
-          <p class="admin-help">Default total: ₹400. These amounts are independently editable.</p>
-          <button id="saveAdmin" class="primary-btn" type="button">💾 Save</button>
-          <button id="resetAdmin" class="secondary-btn" type="button">Reset</button>
-          <p id="adminSaved" class="admin-success"></p>
-        </div>
-      </section>
+      <div class="admin-head"><div><h2>Admin Panel</h2><p class="muted">Edit and save your website information.</p></div><button id="adminLogout" class="secondary-btn" type="button">Logout</button></div>
+      <label>WhatsApp Number<input id="adminWhatsapp" placeholder="919773330642"></label>
+      <h3>Services & Charges</h3>
+      <p class="admin-help">Each service and sub-service has its own editable charge, solution / guidance and required documents.</p>
+      <div id="adminServices"></div><p class="admin-help">💾 Save Changes updates the chatbot services, sub-services, documents and charges on this device.</p>
+      <h3>🧾 Customer Orders & Payment</h3>
+      <p class="admin-help">Orders created from the chatbot are stored here. Update payment and process status; customers can track the Order ID from the chatbot.</p>
+      <div id="adminOrders" class="admin-orders"></div>
+      <h3>Tracking ID, Status & Solution</h3>
+      <p class="admin-help">Add a customer's Tracking ID, current status and solution/next step. The chatbot can search these records.</p>
+      <div id="adminTracking"></div>
+      <button id="addTracking" class="secondary-btn" type="button">＋ Add Tracking Record</button>
+      <div class="admin-actions"><button id="saveAdmin" class="primary-btn" type="button">💾 Save Changes</button><button id="resetAdmin" class="secondary-btn" type="button">Reset</button></div>
+      <p id="adminSaved" class="admin-success"></p>
     </div>
   </div>
 </div>
@@ -493,21 +498,7 @@ ensureUI(); render(localStorage.getItem("smitLang")||"en");
   </div>
 </div>
 
-<script id="smit-suboption-store">
-window.SmitSubOptions=(function(){
- const KEY="smitSubOptionsV1";
- const defaults={
-  "0:1":[
-   {name:"New PAN",guidance:"Fresh PAN application guidance.",documents:"Aadhaar card, photo, mobile number, email",governmentFee:200,serviceCharge:200},
-   {name:"PAN Correction",guidance:"Correction/update in existing PAN details.",documents:"Existing PAN, Aadhaar, supporting proof, mobile number",governmentFee:200,serviceCharge:200},
-   {name:"PAN Reprint",guidance:"Reprint of an existing PAN card.",documents:"Existing PAN / PAN number, Aadhaar, mobile number",governmentFee:200,serviceCharge:200}
-  ]
- };
- function read(){try{return JSON.parse(localStorage.getItem(KEY)||"null")||defaults}catch(e){return defaults}}
- function write(v){localStorage.setItem(KEY,JSON.stringify(v));window.dispatchEvent(new CustomEvent("smit-suboptions-updated"));return v}
- return {read,write,get:function(i,j){const d=read();return Array.isArray(d[i+":"+j])?d[i+":"+j]:[]}};
-})();
-</script><script id="smit-chatbot">
+<script id="smit-chatbot">
 (function(){
  const $=s=>document.querySelector(s);
  const lang=()=>localStorage.getItem('smitLang')||'en';
@@ -549,61 +540,154 @@ function data(){
  function saveOrders(a){localStorage.setItem(ORDER_KEY,JSON.stringify(a))}
  function nextOrderId(){const d=new Date(),date=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');const a=orders(),n=a.filter(x=>(x.id||'').startsWith('SMIT-'+date+'-')).length+1;return 'SMIT-'+date+'-'+String(n).padStart(3,'0')}
  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
- function say(t,buttons=[]){const body=$('#chatBody');const wrap=document.createElement('div');wrap.className='chat-msg bot';wrap.innerHTML='<div>'+t+'</div>';if(buttons.length){const box=document.createElement('div');box.className='chat-buttons';buttons.forEach(b=>{const x=document.createElement('button');x.textContent=b.label;x.onclick=b.fn;box.appendChild(x)});wrap.appendChild(box)}body.appendChild(wrap);body.scrollTop=body.scrollHeight}
- function reset(){ $('#chatBody').innerHTML='';const en=lang()==='en';say(en?'Hello! How can I help you today?':'नमस्कार! मी आपली कशी मदत करू?',[{label:en?'📋 Services & Charges':'📋 सेवा व शुल्क',fn:showServices},{label:en?'🔎 Track Order':'🔎 ऑर्डर ट्रॅक करा',fn:askTrack},{label:en?'💡 Solution / Guidance':'💡 उपाय / मार्गदर्शन',fn:showServices},{label:'💬 WhatsApp Enquiry',fn:()=>location.href=waChat('Hello, I need help with your services.')}]);}
- function waChat(msg){return 'https://wa.me/'+((data().whatsapp||'919773330642'))+'?text='+encodeURIComponent(msg)}
- function showServices(){const d=data(),en=lang()==='en';say(en?'Select a service. You will then see its sub-services, charges and required documents.':'सेवा निवडा. त्यानंतर उप-सेवा, शुल्क आणि आवश्यक कागदपत्रे दिसतील.',d.services.map((s,i)=>({label:s[0]||('Service '+(i+1)),fn:()=>showSubs(i)})))}
- function showSubs(i){const d=data(),s=d.services[i],en=lang()==='en';const serviceCharge=s[3]||'';const title='<b>'+esc(s[0])+'</b>'+(serviceCharge?'<br>💰 Service charge: <b>'+esc(serviceCharge)+'</b>':'');say(title+'<br><br>'+(en?'Choose a sub-service:':'उप-सेवा निवडा:'),s[2].map((x,j)=>({label:x[0]||('Sub-service '+(j+1)),fn:()=>showSub(i,j)})).concat([{label:en?'⬅ Services':'⬅ सेवा',fn:showServices}]))}
- function showSub(i,j){
-  const d=data(),s=d.services[i],x=s[2][j],en=lang()==='en';
-  const opts=window.SmitSubOptions.get(i,j);
-  if(opts.length){
-    say('<b>'+esc(x[0])+'</b><br><br>'+(en?'Choose New / Correction / Reprint:':'New / Correction / Reprint पर्याय निवडा:'),opts.map((o,k)=>({label:o.name,fn:()=>showSubOption(i,j,k)})).concat([{label:en?'⬅ Back':'⬅ मागे',fn:()=>showSubs(i)}]));
-    return;
-  }
-  showSubOption(i,j,-1);
+ function say(t,buttons=[]){
+ const body=$('#chatBody'); body.innerHTML='';
+ const wrap=document.createElement('div');wrap.className='chat-msg bot';
+ wrap.innerHTML='<div>'+t+'</div>';
+ if(buttons.length){const box=document.createElement('div');box.className='chat-buttons';
+ buttons.forEach(b=>{const x=document.createElement('button');x.textContent=b.label;x.onclick=b.fn;box.appendChild(x)});wrap.appendChild(box)}
+ body.appendChild(wrap);body.scrollTop=body.scrollHeight;
+}
+function reset(){ $('#chatBody').innerHTML='';const en=lang()==='en';say(en?'Hello! How can I help you today?':'नमस्कार! मी आपली कशी मदत करू?',[{label:en?'📋 Services & Charges':'📋 सेवा व शुल्क',fn:showServices},{label:en?'🔎 Track Order':'🔎 ऑर्डर ट्रॅक करा',fn:askTrack},{label:en?'💡 Solution / Guidance':'💡 उपाय / मार्गदर्शन',fn:showServices},{label:'💬 WhatsApp Enquiry',fn:()=>location.href=waChat('Hello, I need help with your services.')}]);}
+function waChat(msg){return 'https://wa.me/'+((data().whatsapp||'919773330642'))+'?text='+encodeURIComponent(msg)}
+function showServices(){
+ const d=data(),en=lang()==='en';
+ say('<div class="flow-line"><span>'+(en?'Service':'सेवा')+'</span></div><div class="flow-title">'+(en?'Select a main service':'मुख्य सेवा निवडा')+'</div>',
+ d.services.map((s,i)=>({label:s[0]||('Service '+(i+1)),fn:()=>showSubs(i)})));
+}
+function showSubs(i){
+ const d=data(),s=d.services[i],en=lang()==='en';
+ say('<div class="flow-line"><span>'+esc(s[0])+'</span></div><div class="flow-title">'+(en?'Select from this service':'या सेवेतील पर्याय निवडा')+'</div>',
+ (s[2]||[]).map((x,j)=>({label:x[0]||('Sub-service '+(j+1)),fn:()=>showSub(i,j)}))
+ .concat([{label:en?'⬅ Back':'⬅ मागे',fn:showServices}]));
+}
+function showSub(i,j){
+ const d=data(),s=d.services[i],x=s[2][j],en=lang()==='en';
+ const opts=(window.SmitSubOptions&&window.SmitSubOptions.get)?window.SmitSubOptions.get(i,j):[];
+ if(opts.length){
+   say('<div class="flow-line"><span>'+esc(s[0])+'</span> <b>›</b> <span>'+esc(x[0])+'</span></div><div class="flow-title">'+(en?'Select an option':'पर्याय निवडा')+'</div>',
+     opts.map((o,k)=>({label:o.name,fn:()=>showSubOption(i,j,k)}))
+     .concat([{label:en?'⬅ Back':'⬅ मागे',fn:()=>showSubs(i)}]));
+   return;
  }
- function showSubOption(i,j,k){
-  const d=data(),s=d.services[i],x=s[2][j],o=k>=0?window.SmitSubOptions.get(i,j)[k]:null,en=lang()==='en';
-  const title=o?.name||x[0], charge=o?Number(o.governmentFee||0)+Number(o.serviceCharge||0):(x[3]||s[3]||'Contact for charges');
-  const docs=(o?.documents||x[2]||'').split(',').map(v=>v.trim()).filter(Boolean).map(v=>'<li>'+esc(v)+'</li>').join('');
-  const solution=o?.guidance||x[1]||(en?'Guidance available.':'मार्गदर्शन उपलब्ध आहे.');
-  say('<b>'+esc(title)+'</b><br>💰 <b>'+(en?'Total: ':'एकूण: ')+esc(charge)+'</b><br><br>💡 <b>'+(en?'Guidance':'मार्गदर्शन')+':</b> '+esc(solution)+'<br><br>📄 <b>'+(en?'Required Documents':'आवश्यक कागदपत्रे')+'</b><ul>'+(docs||'<li>Confirm documents with us.</li>')+'</ul>',[
+ showSubOption(i,j,-1);
+}
+function showSubOption(i,j,k){
+ const d=data(),s=d.services[i],x=s[2][j],en=lang()==='en';
+ const o=(k>=0&&window.SmitSubOptions&&window.SmitSubOptions.get)?window.SmitSubOptions.get(i,j)[k]:null;
+ const title=o?.name||x[0], charge=o?(Number(o.governmentFee||0)+Number(o.serviceCharge||0)):(x[3]||s[3]||'Contact for charges');
+ const gov=o?Number(o.governmentFee||0):null, svc=o?Number(o.serviceCharge||0):null;
+ const docs=(o?.documents||x[2]||'').split(',').map(v=>v.trim()).filter(Boolean).map(v=>'<li>'+esc(v)+'</li>').join('');
+ const guidance=o?.guidance||x[1]||(en?'Guidance available.':'मार्गदर्शन उपलब्ध आहे.');
+ const fee=o?('💰 <b>'+(en?'Government Fee':'शासकीय शुल्क')+': ₹'+gov+'</b><br>💼 <b>'+(en?'Smit Service Charge':'Smit सेवा शुल्क')+': ₹'+svc+'</b><br>💵 <b>'+(en?'Total':'एकूण')+': ₹'+charge+'</b>'):'💰 <b>'+(en?'Charge':'शुल्क')+': '+esc(charge)+'</b>';
+ say('<div class="flow-line"><span>'+esc(s[0])+'</span> <b>›</b> <span>'+esc(x[0])+'</span> <b>›</b> <span>'+esc(title)+'</span></div><div class="flow-card"><h3>'+esc(title)+'</h3>'+fee+'<br><br>💡 <b>'+(en?'Guidance':'मार्गदर्शन')+':</b> '+esc(guidance)+'<br><br>📄 <b>'+(en?'Required Documents':'आवश्यक कागदपत्रे')+'</b><ul>'+(docs||'<li>'+(en?'Please confirm documents with us.':'कागदपत्रांची खात्री आमच्याकडून करा.')+'</li>')+'</ul></div>',
+ [
    {label:en?'✅ Accept Service':'✅ सेवा स्वीकारा',fn:()=>openOrder(i,j,k)},
-   {label:en?'💬 WhatsApp Enquiry':'💬 WhatsApp चौकशी',fn:()=>location.href=waChat('Hello, I need '+title+' under '+s[0]+' → '+x[0]+'.')},
+   {label:en?'💬 WhatsApp Enquiry':'💬 WhatsApp चौकशी',fn:()=>location.href=waChat('Hello, I need '+title+' under '+s[0]+'.')},
    {label:en?'⬅ Back':'⬅ मागे',fn:()=>k>=0?showSub(i,j):showSubs(i)}
-  ]);
+ ]);
+}
+function openOrder(i,j){const d=data(),s=d.services[i],x=s[2][j],charge=x[3]||s[3]||'Contact for charges',en=lang()==='en';const modal=$('#smitOrderModal'),c=$('#smitOrderContent');c.innerHTML='<h2>✅ '+(en?'Accept Service':'सेवा स्वीकारा')+'</h2><p><b>'+esc(s[0])+'</b> → <b>'+esc(x[0])+'</b></p><div class="smit-order-card"><b>💰 '+(en?'Service Charge':'सेवा शुल्क')+':</b> '+esc(charge)+'<br><span class="smit-note">'+(en?'After accepting, you will receive an Order ID, document WhatsApp option and payment QR.':'सेवा स्वीकारल्यानंतर Order ID, Documents WhatsApp option आणि Payment QR मिळेल.')+'</span></div><div class="smit-order-form"><label>'+(en?'Customer Name':'ग्राहकाचे नाव')+'<input id="orderName" placeholder="Your name"></label><label>'+(en?'WhatsApp Number':'WhatsApp नंबर')+'<input id="orderPhone" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number"></label><button id="createOrderBtn" class="smit-primary" type="button">'+(en?'Create Service Order':'Service Order तयार करा')+'</button></div>';
+   modal.classList.add('show');modal.setAttribute('aria-hidden','false');$('#createOrderBtn').onclick=()=>createOrder(i,j);}
+ function createOrder(i,j){const d=data(),s=d.services[i],x=s[2][j],name=$('#orderName').value.trim(),phone=$('#orderPhone').value.replace(/\D/g,''),charge=x[3]||s[3]||'Contact for charges';if(!name||phone.length!==10){alert('कृपया नाव आणि 10 अंकी WhatsApp नंबर भरा.');return}const id=nextOrderId();const o={id,createdAt:new Date().toISOString(),name,phone,service:s[0],subService:x[0],charge,documents:x[2]||'',paymentStatus:'Pending',transactionId:'',status:'Order Created',solution:'Documents pending',invoiceNo:'INV-'+id};const a=orders();a.push(o);saveOrders(a);showOrder(o);}
+ function showOrder(o){const c=$('#smitOrderContent');c.innerHTML='<h2>🎉 Service Order Created</h2><div class="smit-order-card"><div>Order ID</div><div class="smit-order-id">'+esc(o.id)+'</div><div class="smit-note">Keep this Order ID safe. You can use it later to track your service process.</div></div><div class="smit-order-card"><b>📄 Required Documents</b><ul>'+((o.documents||'').split(',').map(v=>v.trim()).filter(Boolean).map(v=>'<li>'+esc(v)+'</li>').join('')||'<li>Contact us for documents</li>')+'</ul><div class="smit-actions"><a class="smit-green" target="_blank" href="'+waChat('Hello Smit Legal, I want to send documents for Order ID '+o.id+'. Service: '+o.service+' - '+o.subService+'.')+'">📲 Send Documents on WhatsApp</a></div></div><div class="smit-order-card"><b>💳 Payment</b><p>Scan the QR below and pay the service charge: <strong>'+esc(o.charge)+'</strong></p><img class="smit-qr" src="payment-qr.png" alt="PhonePe Payment QR"><p class="smit-note">After payment, enter the transaction/reference number below. Admin will verify the payment.</p><input id="txnInput" class="chat-input" placeholder="UPI Transaction / Reference ID"><div class="smit-actions"><button id="paidBtn" class="smit-green" type="button">✅ I Have Paid</button></div></div><div class="smit-actions"><button id="invoiceBtn" class="smit-light" type="button">🧾 View / Print Invoice</button><a class="smit-green" target="_blank" href="'+waChat('Hello Smit Legal, my service order is '+o.id+'. Please confirm my order and payment status.')+'">💬 WhatsApp Confirmation</a></div><p id="orderMsg" class="smit-note"></p>';
+   $('#paidBtn').onclick=()=>{const tx=$('#txnInput').value.trim();if(!tx){$('#orderMsg').textContent='कृपया transaction/reference number भरा.';return}const a=orders(),idx=a.findIndex(x=>x.id===o.id);if(idx>=0){a[idx].transactionId=tx;a[idx].paymentStatus='Payment Submitted';a[idx].status='Payment Verification Pending';saveOrders(a);o=a[idx];}$('#orderMsg').textContent='✓ Payment details submitted. Admin verification pending.';renderOrder(o);};
+   $('#invoiceBtn').onclick=()=>printInvoice(o);
  }
- function openOrder(i,j,k){
-  const d=data(),s=d.services[i],x=s[2][j],o=k>=0?window.SmitSubOptions.get(i,j)[k]:null,en=lang()==='en';
-  const gov=Number(o?.governmentFee??200),svc=Number(o?.serviceCharge??200),total=gov+svc;
-  const title=o?.name||x[0],modal=$('#smitOrderModal'),c=$('#smitOrderContent');
-  c.innerHTML='<h2>✅ '+(en?'Accept Service':'सेवा स्वीकारा')+'</h2><p><b>'+esc(s[0])+'</b> → <b>'+esc(x[0])+'</b>'+(o?' → <b>'+esc(title)+'</b>':'')+'</p><div class="smit-order-card"><b>Government / Official Fee:</b> ₹'+gov+'<br><b>Smit Service Charge:</b> ₹'+svc+'<br><b>Total:</b> ₹'+total+'</div><div class="smit-order-form"><label>'+(en?'Customer Name':'ग्राहकाचे नाव')+'<input id="orderName" placeholder="Your name"></label><label>'+(en?'WhatsApp Number':'WhatsApp नंबर')+'<input id="orderPhone" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number"></label><button id="createOrderBtn" class="smit-primary" type="button">Create Service Order</button></div>';
-  modal.classList.add('show');modal.setAttribute('aria-hidden','false');$('#createOrderBtn').onclick=()=>createOrder(i,j,k);
- }
- function createOrder(i,j,k){
-  const d=data(),s=d.services[i],x=s[2][j],o2=k>=0?window.SmitSubOptions.get(i,j)[k]:null;
-  const name=$('#orderName').value.trim(),phone=$('#orderPhone').value.replace(/\D/g,''),gov=Number(o2?.governmentFee??200),svc=Number(o2?.serviceCharge??200),total=gov+svc;
-  if(!name||phone.length!==10){alert('कृपया नाव आणि 10 अंकी WhatsApp नंबर भरा.');return}
-  const id=nextOrderId(),title=o2?.name||x[0],docs=o2?.documents||x[2]||'';
-  const ord={id,createdAt:new Date().toISOString(),name,phone,service:s[0],subService:x[0],subOption:title,governmentFee:gov,serviceCharge:svc,total,charge:'₹'+total,documents:docs,paymentStatus:'Pending',transactionId:'',upiId:'',paymentMethod:'UPI QR',status:'Order Created',solution:o2?.guidance||x[1]||'Guidance available',invoiceNo:'INV-'+id};
-  const a=orders();a.push(ord);saveOrders(a);showOrder(ord);
- }
-
- function showOrder(o){
- const c=$('#smitOrderContent');
- c.innerHTML='<h2>🎉 Service Order Created</h2><div class="smit-order-card"><div>Order ID</div><div class="smit-order-id">'+esc(o.id)+'</div><div><b>Service:</b> '+esc(o.service)+' → '+esc(o.subService)+' → '+esc(o.subOption||'')+'</div></div><div class="smit-order-card"><b>📄 Required Documents</b><ul>'+((o.documents||'').split(',').map(v=>v.trim()).filter(Boolean).map(v=>'<li>'+esc(v)+'</li>').join('')||'<li>Contact us for documents</li>')+'</ul><div class="smit-actions"><a class="smit-green" target="_blank" href="'+waChat('Hello Smit Legal, I want to send documents for Order ID '+o.id+'.')+'">📲 Send Documents on WhatsApp</a></div></div><div class="smit-order-card"><b>💳 Payment</b><p>Government Fee: ₹'+esc(o.governmentFee)+'<br>Smit Service Charge: ₹'+esc(o.serviceCharge)+'<br><strong>Total: ₹'+esc(o.total)+'</strong></p><img class="smit-qr" src="payment-qr.png" alt="Payment QR"><input id="txnInput" class="chat-input" placeholder="UPI Transaction / UTR"><input id="upiInput" class="chat-input" placeholder="UPI ID / payer number (optional)"><div class="smit-actions"><button id="paidBtn" class="smit-green" type="button">✅ I Have Paid</button></div></div><div class="smit-actions"><button id="invoiceBtn" class="smit-light" type="button">🧾 View / Print Invoice</button></div><p id="orderMsg" class="smit-note"></p>';
- $('#paidBtn').onclick=()=>{const tx=$('#txnInput').value.trim(),upi=$('#upiInput').value.trim();if(!tx){$('#orderMsg').textContent='कृपया transaction/reference number भरा.';return}const a=orders(),idx=a.findIndex(x=>x.id===o.id);if(idx>=0){a[idx].transactionId=tx;a[idx].upiId=upi;a[idx].paymentStatus='Payment Submitted';a[idx].status='Payment Verification Pending';saveOrders(a);o=a[idx]}$('#orderMsg').textContent='✓ Payment details submitted. Admin verification pending.';};
- $('#invoiceBtn').onclick=()=>printInvoice(o);
- }
- function renderOrder(o){showOrder(o)}
- function showOrderNoReset(o){showOrder(o)}
+ function renderOrder(o){showOrderNoReset(o)}
+ function showOrderNoReset(o){const c=$('#smitOrderContent');const tx=o.transactionId||'';c.innerHTML='<h2>🧾 Order '+esc(o.id)+'</h2><div class="smit-order-card"><b>Service:</b> '+esc(o.service)+' → '+esc(o.subService)+'<br><b>Amount:</b> '+esc(o.charge)+'<br><b>Payment:</b> '+esc(o.paymentStatus)+'<br><b>Status:</b> '+esc(o.status)+'</div><div class="smit-order-card"><b>📄 Documents</b><p>'+esc(o.documents||'Please contact us.')+'</p><div class="smit-actions"><a class="smit-green" target="_blank" href="'+waChat('Hello Smit Legal, I am sending documents for Order ID '+o.id+'.')+'">📲 Send Documents on WhatsApp</a></div></div><div class="smit-order-card"><b>💳 Payment</b><img class="smit-qr" src="payment-qr.png" alt="PhonePe Payment QR"><input id="txnInput" class="chat-input" value="'+esc(tx)+'" placeholder="UPI Transaction / Reference ID"><div class="smit-actions"><button id="paidBtn" class="smit-green" type="button">✅ Submit Payment Reference</button></div></div><div class="smit-actions"><button id="invoiceBtn" class="smit-light" type="button">🧾 View / Print Invoice</button><a class="smit-green" target="_blank" href="'+waChat('Hello Smit Legal, Order ID '+o.id+'. Please send/confirm my invoice and order status.')+'">💬 Send Invoice Details on WhatsApp</a></div><p id="orderMsg" class="smit-note"></p>';$('#paidBtn').onclick=()=>{const tx=$('#txnInput').value.trim();if(!tx){$('#orderMsg').textContent='Transaction/reference number required.';return}const a=orders(),idx=a.findIndex(x=>x.id===o.id);if(idx>=0){a[idx].transactionId=tx;a[idx].paymentStatus='Payment Submitted';a[idx].status='Payment Verification Pending';saveOrders(a);o=a[idx]}$('#orderMsg').textContent='✓ Payment submitted for admin verification.'};$('#invoiceBtn').onclick=()=>printInvoice(o);}
  function printInvoice(o){
-  const w=window.open('','_blank','width=800,height=900');if(!w)return;
-  const logo=new URL('smit-logo.png',location.href).href;
-  const htmlInv='<!doctype html><html><head><title>Invoice '+esc(o.invoiceNo)+'</title><style>body{font-family:Arial;padding:30px;color:#1f2937}.head{display:flex;gap:18px;border-bottom:3px solid #4c1d95;padding-bottom:14px}.logo{width:80px;height:80px;object-fit:contain}.box{border:1px solid #ddd;border-radius:12px;padding:15px;margin:12px 0}table{width:100%;border-collapse:collapse}td{padding:9px;border-bottom:1px solid #eee}.total{font-size:20px;font-weight:800}</style></head><body><div class="head"><img class="logo" src="'+logo+'"><div><h2>Smit Legal and Online Seva Kendra</h2><div>smitlegally@gmail.com</div><div>WhatsApp: 9773330642</div></div></div><div class="box"><b>Invoice:</b> '+esc(o.invoiceNo)+'<br><b>Order ID:</b> '+esc(o.id)+'<br><b>Date:</b> '+new Date(o.createdAt).toLocaleString()+'</div><div class="box"><b>Customer:</b> '+esc(o.name)+'<br><b>WhatsApp:</b> '+esc(o.phone)+'</div><div class="box"><b>Service:</b> '+esc(o.service)+' → '+esc(o.subService)+' → '+esc(o.subOption||'')+'</div><table><tr><td>Government / Official Fee</td><td>₹'+esc(o.governmentFee)+'</td></tr><tr><td>Smit Service Charge</td><td>₹'+esc(o.serviceCharge)+'</td></tr><tr><td><b>Total</b></td><td><b>₹'+esc(o.total)+'</b></td></tr></table><div class="box"><b>Payment Status:</b> '+esc(o.paymentStatus)+'<br><b>Transaction / UTR:</b> '+esc(o.transactionId||'Pending')+'<br><b>UPI ID / Payer:</b> '+esc(o.upiId||'Not provided')+'<br><b>Payment Method:</b> '+esc(o.paymentMethod||'UPI QR')+'</div><p>Thank you for choosing Smit Legal and Online Seva Kendra.</p><script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>';
-  w.document.write(htmlInv);w.document.close();
- }
+ const w=window.open('','_blank','width=800,height=900');if(!w)return;
+ const logo=new URL('smit-logo.png', location.href).href;
+ w.document.write('<!doctype html><html><head><title>Invoice '+esc(o.invoiceNo)+'</title><style>body{font-family:Arial,sans-serif;padding:30px;color:#1f2937}.head{display:flex;align-items:center;gap:18px;border-bottom:3px solid #4c1d95;padding-bottom:14px}.logo{width:90px;height:90px;object-fit:contain;border-radius:12px}.brand{font-size:25px;font-weight:800;color:#1f3b78}.sub{color:#666;margin-top:5px}.box{border:1px solid #ddd;border-radius:12px;padding:16px;margin:12px 0}table{width:100%;border-collapse:collapse}td{padding:9px;border-bottom:1px solid #eee}.total{font-size:20px;font-weight:800}</style></head><body><div class="head"><img class="logo" src="'+logo+'" onerror="this.style.display=\'none\'"><div><div class="brand">Smit Legal and Online Seva Kendra</div><div class="sub">Trust • Fast Service • Right Guidance</div><div class="sub">WhatsApp: 9773330642</div></div></div><div class="box"><b>Invoice No:</b> '+esc(o.invoiceNo)+'<br><b>Order ID:</b> '+esc(o.id)+'<br><b>Date:</b> '+new Date(o.createdAt).toLocaleString()+'</div><div class="box"><b>Customer:</b> '+esc(o.name)+'<br><b>WhatsApp:</b> '+esc(o.phone)+'</div><table><tr><td><b>'+esc(o.service)+' → '+esc(o.subService)+'</b></td><td><b>'+esc(o.charge)+'</b></td></tr></table><div class="box total">Payment Status: '+esc(o.paymentStatus)+'</div><p>Thank you for choosing Smit Legal and Online Seva Kendra.</p><script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script><script id="smit-pan-options-fix">
+(function(){
+ const K='smitSubOptionsV1';
+ try{
+  const d=JSON.parse(localStorage.getItem(K)||'{}');
+  const key='0:1';
+  const existing=Array.isArray(d[key])?d[key]:[];
+  const names=existing.map(x=>x.name);
+  const defs=[
+   {name:'New PAN',guidance:'Fresh PAN application guidance.',documents:'Aadhaar card, photo, mobile number, email',governmentFee:200,serviceCharge:200},
+   {name:'PAN Correction',guidance:'Correction/update in existing PAN details.',documents:'Existing PAN, Aadhaar, supporting proof, mobile number',governmentFee:200,serviceCharge:200},
+   {name:'PAN Reprint',guidance:'Reprint of an existing PAN card.',documents:'Existing PAN / PAN number, Aadhaar, mobile number',governmentFee:200,serviceCharge:200}
+  ];
+  d[key]=defs.map(x=>existing.find(y=>y.name===x.name)||x);
+  localStorage.setItem(K,JSON.stringify(d));
+ }catch(e){}
+})();
+</script>
+<script id="smit-service-chat-sync">
+(function(){
+  function getData(){
+    try{
+      if(typeof data==="function") return data();
+    }catch(e){}
+    return {services:[]};
+  }
+  function getOpts(i,j){
+    try{
+      return window.SmitSubOptions && window.SmitSubOptions.get ? window.SmitSubOptions.get(i,j) : [];
+    }catch(e){ return []; }
+  }
+  function openService(i){
+    try{
+      if(typeof showServices==="function"){
+        showServices();
+        var d=getData(), s=d.services[i];
+        if(s && typeof showSubs==="function") showSubs(i);
+      }
+    }catch(e){}
+    var chat=document.querySelector('#chatbox,#chatBox,.chatbox');
+    if(chat && chat.scrollIntoView) chat.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+  window.syncServiceCards=function(){
+    var d=getData(), cards=document.querySelectorAll('.service-card');
+    cards.forEach(function(card,i){
+      var s=d.services[i]; if(!s) return;
+      var h3=card.querySelector('h3'), p=card.querySelector('p');
+      if(h3) h3.textContent=s[0]||h3.textContent;
+      if(p) p.textContent=s[1]||p.textContent;
+
+      var old=card.querySelector('.service-flow-list'); if(old) old.remove();
+      var box=document.createElement('div'); box.className='service-flow-list';
+      (s[2]||[]).forEach(function(sub,j){
+        var row=document.createElement('div'); row.className='flow-service-sub';
+        row.textContent=(j+1)+'. '+(sub[0]||'Sub-service');
+        box.appendChild(row);
+        var opts=getOpts(i,j);
+        if(opts.length){
+          opts.forEach(function(o,k){
+            var b=document.createElement('button');
+            b.type='button'; b.className='flow-service-opt';
+            b.textContent=o.name||('Option '+(k+1));
+            b.addEventListener('click',function(){
+              if(typeof showSubOption==="function") showSubOption(i,j,k);
+              var chat=document.querySelector('#chatbox,#chatBox,.chatbox');
+              if(chat && chat.scrollIntoView) chat.scrollIntoView({behavior:"smooth",block:"center"});
+            });
+            box.appendChild(b);
+          });
+        }
+      });
+      var oldBtn=card.querySelector('.service-flow-open'); if(oldBtn) oldBtn.remove();
+      var btn=document.createElement('button'); btn.type='button'; btn.className='service-flow-open';
+      btn.textContent='💬 View Full Service Flow';
+      btn.addEventListener('click',function(){openService(i)});
+      box.appendChild(btn);
+      card.appendChild(box);
+    });
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(window.syncServiceCards,150);
+    setTimeout(window.syncServiceCards,800);
+  });
+  window.addEventListener('smit-suboptions-updated',window.syncServiceCards);
+})();
+</script>
+</body></html>');
+ w.document.close();
+}
  function askTrack(){const body=$('#chatBody'),en=lang()==='en';const wrap=document.createElement('div');wrap.className='chat-msg bot';wrap.innerHTML='<div>'+(en?'Enter your Order ID:':'आपला Order ID टाका:')+'</div><input id="trackInput" class="chat-input" placeholder="e.g. SMIT-20260818-001"><button id="trackBtn" class="chat-track-btn">'+(en?'Check Status':'Status तपासा')+'</button>';body.appendChild(wrap);body.scrollTop=body.scrollHeight;$('#trackBtn').onclick=()=>{const id=$('#trackInput').value.trim().toLowerCase(),rec=orders().find(x=>(x.id||'').toLowerCase()===id)||(data().tracking||[]).find(x=>(x.id||'').toLowerCase()===id);if(rec)say('<b>Order/Tracking ID:</b> '+esc(rec.id)+'<br>📌 <b>Status:</b> '+esc(rec.status||'Updated')+'<br>💳 <b>Payment:</b> '+esc(rec.paymentStatus||'Not available')+'<br>💡 <b>Next Step:</b> '+esc(rec.solution||'Please contact us for guidance.'),[{label:'💬 WhatsApp',fn:()=>location.href=waChat('Hello, my Order ID is '+rec.id+'. Please help me with the status.')}]);else say(en?'Order ID not found. Please check the ID or contact us on WhatsApp.':'Order ID सापडला नाही. ID तपासा किंवा WhatsApp वर संपर्क करा.',[{label:'💬 WhatsApp',fn:()=>location.href=waChat('Hello, my Order ID is '+$('#trackInput').value.trim()+'. Please check and guide me.')}])}}
  $('#chatFab').onclick=()=>{$('#chatBox').classList.toggle('open');if($('#chatBody').children.length===0)reset()};$('#chatClose').onclick=()=>$('#chatBox').classList.remove('open');
  $('#smitOrderClose').onclick=()=>{$('#smitOrderModal').classList.remove('show');$('#smitOrderModal').setAttribute('aria-hidden','true')};$('#smitOrderModal').addEventListener('click',e=>{if(e.target.id==='smitOrderModal')$('#smitOrderModal').classList.remove('show')});
@@ -613,7 +697,7 @@ function data(){
 <script id="smit-admin-theme">
 (function(){
 const ADMIN_KEY='smitLegalAdminV6', LEGACY=['smitLegalAdminV6','smitLegalAdminV4','smitLegalAdminV3'];
-const USER='admin', DEFAULT_PASS='', PHONE='9773330642';
+const USER='admin', DEFAULT_PASS='admin123', PHONE='9773330642';
 const $=s=>document.querySelector(s);
 const cloneDefault=()=> (window.SmitData?.en?.services||[]).map(s=>[
  s[0]||'',s[1]||'',(s[2]||[]).map(x=>[x[0]||'',x[1]||'',x[2]||'',x[3]||'']),s[3]||''
@@ -668,22 +752,42 @@ function apply(){
 }
 
 function renderAdmin(){
- const d=read(),wrap=$('#adminServices'); if(!wrap)return;
+ const d=read(), wrap=$('#adminServices'); if(!wrap)return;
  $('#adminWhatsapp').value=d.whatsapp||'';
- const fees=window.SmitFees?window.SmitFees.get():{governmentFee:200,serviceCharge:200};
- $('#adminGovFee').value=fees.governmentFee;$('#adminServiceFee').value=fees.serviceCharge;
  wrap.innerHTML='';
- d.services.forEach((svc,i)=>{
+ d.services.forEach((s,i)=>{
   const row=document.createElement('div');row.className='admin-service';
-  row.innerHTML='<details><summary>'+esc(svc[0]||('Service '+(i+1)))+' <span class="muted">› edit</span></summary><div style="padding:0 12px 12px"><label>Service Name<input data-i="'+i+'" data-f="title" value="'+esc(svc[0])+'"></label><label>Description<textarea data-i="'+i+'" data-f="desc">'+esc(svc[1])+'</textarea></label><div class="admin-help">Sub-services</div><div class="admin-sub-list">'+(svc[2]||[]).map((x,j)=>{
-    const opts=window.SmitSubOptions.get(i,j);
-    return '<div class="admin-sub-card"><details><summary>'+esc(x[0]||('Sub-service '+(j+1)))+'</summary><div class="compact-fields"><label>Name<input data-i="'+i+'" data-j="'+j+'" data-f="title" value="'+esc(x[0])+'"></label><label>Charge (₹)<input data-i="'+i+'" data-j="'+j+'" data-f="charge" value="'+esc(x[3]||'')+'"></label></div><label>Guidance<textarea data-i="'+i+'" data-j="'+j+'" data-f="solution">'+esc(x[1])+'</textarea></label><label>Documents<textarea data-i="'+i+'" data-j="'+j+'" data-f="docs">'+esc(x[2])+'</textarea></label><div class="admin-help">Sub-options</div><div class="admin-options">'+opts.map((o,k)=>'<div class="admin-sub-card"><div class="compact-fields"><label>Option<input data-oi="'+i+'" data-oj="'+j+'" data-ok="'+k+'" data-of="name" value="'+esc(o.name)+'"></label><label>Government Fee<input type="number" data-oi="'+i+'" data-oj="'+j+'" data-ok="'+k+'" data-of="governmentFee" value="'+esc(o.governmentFee) +'"></label><label>Smit Charge<input type="number" data-oi="'+i+'" data-oj="'+j+'" data-ok="'+k+'" data-of="serviceCharge" value="'+esc(o.serviceCharge) +'"></label></div><label>Guidance<textarea data-oi="'+i+'" data-oj="'+j+'" data-ok="'+k+'" data-of="guidance">'+esc(o.guidance)+'</textarea></label><label>Documents<textarea data-oi="'+i+'" data-oj="'+j+'" data-ok="'+k+'" data-of="documents">'+esc(o.documents)+'</textarea></label></div>').join('')+'</div><button type="button" class="secondary-btn" data-addopt="'+i+'" data-addsubopt="'+j+'">＋ Add Option</button></details></div>';
-  }).join('')}</div></div></details>';
+  row.innerHTML=`<div class="admin-service-heading"><b>Service ${i+1}</b><button type="button" class="remove-btn" data-rs="${i}">Delete</button></div>
+  <label>Service Name<input data-i="${i}" data-f="title" value="${esc(s[0])}"></label>
+  <label>Service Charge<input data-i="${i}" data-f="charge" value="${esc(s[3])}" placeholder="e.g. ₹199"></label>
+  <label>Service Description<textarea data-i="${i}" data-f="desc">${esc(s[1])}</textarea></label>
+  <div class="admin-sub-title">Sub-services & Details</div>
+  <div class="admin-sub-list">${(s[2]||[]).map((x,j)=>`<div class="admin-sub-card">
+    <div class="admin-sub-heading"><b>Sub-service ${j+1}</b><button type="button" class="remove-btn" data-rs="${i}" data-rsub="${j}">Delete</button></div>
+    <label>Name<input data-i="${i}" data-j="${j}" data-f="title" value="${esc(x[0])}"></label>
+    <label>Charge<input data-i="${i}" data-j="${j}" data-f="charge" value="${esc(x[3])}" placeholder="e.g. ₹299"></label>
+    <label>Solution / Guidance<textarea data-i="${i}" data-j="${j}" data-f="solution">${esc(x[1])}</textarea></label>
+    <label>Required Documents<textarea data-i="${i}" data-j="${j}" data-f="docs">${esc(x[2])}</textarea></label>
+  </div>`).join('')}</div>
+  <button type="button" class="secondary-btn" data-addsub="${i}">＋ Add Sub-service</button>`;
   wrap.appendChild(row);
  });
- wrap.querySelectorAll('[data-addopt]').forEach(b=>b.onclick=()=>{const d=read(),i=+b.dataset.addopt,j=+b.dataset.addsubopt,all=window.SmitSubOptions.read(),key=i+":"+j;all[key]=all[key]||[];all[key].push({name:"New Option",guidance:"Add guidance",documents:"Required documents",governmentFee:200,serviceCharge:200});window.SmitSubOptions.write(all);renderAdmin()});
+ const add=document.createElement('button');add.type='button';add.className='secondary-btn';add.id='addServiceV6';add.textContent='＋ Add New Service';wrap.appendChild(add);
+
+ wrap.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{
+   const d=read(),i=+b.dataset.rs;
+   if(b.dataset.rsub!==undefined)d.services[i][2].splice(+b.dataset.rsub,1);else d.services.splice(i,1);
+   write(d);renderAdmin();
+ });
+ wrap.querySelectorAll('[data-addsub]').forEach(b=>b.onclick=()=>{
+   const d=read(),i=+b.dataset.addsub;
+   d.services[i][2].push(['New Sub-service','Add solution / guidance','Aadhaar, photo, mobile number','']);
+   write(d);renderAdmin();
+ });
+ $('#addServiceV6').onclick=()=>{const d=read();d.services.push(['New Service','Add service description',[['New Sub-service','Add solution / guidance','Required documents','']],'']);write(d);renderAdmin()};
  renderOrders();renderTracking();
 }
+
 function renderOrders(){
  const wrap=$('#adminOrders');if(!wrap)return;
  const a=window.SmitOrders?window.SmitOrders.orders():[];wrap.innerHTML='';
@@ -777,39 +881,7 @@ apply();
 })();
 </script>
 
-<script id="smit-final-master">
-(function(){
- const $=s=>document.querySelector(s);
- const feeKey="smitFeeStructureV2";
- window.SmitFees={get(){try{return Object.assign({governmentFee:200,serviceCharge:200},JSON.parse(localStorage.getItem(feeKey)||"{}"))}catch(e){return {governmentFee:200,serviceCharge:200}}},save(g,s){const v={governmentFee:Number(g)||0,serviceCharge:Number(s)||0};localStorage.setItem(feeKey,JSON.stringify(v));return v}};
- function adminVisible(){return new URLSearchParams(location.search).get("admin")==="1"}
- function revealAdmin(){const b=$("#adminOpen");if(b)b.style.display=adminVisible()?"inline-flex":"none"}
- revealAdmin();
- const save=$("#saveAdmin");
- if(save)save.onclick=function(){
-   const d=read();d.whatsapp=($("#adminWhatsapp").value||"").replace(/\D/g,"");
-   const fees=window.SmitFees.save($("#adminGovFee").value,$("#adminServiceFee").value);
-   document.querySelectorAll("#adminServices [data-i]").forEach(el=>{
-     const i=+el.dataset.i,j=el.dataset.j===undefined?null:+el.dataset.j,f=el.dataset.f;
-     if(j===null){if(f==="title")d.services[i][0]=el.value;if(f==="desc")d.services[i][1]=el.value}
-     else {if(f==="title")d.services[i][2][j][0]=el.value;if(f==="solution")d.services[i][2][j][1]=el.value;if(f==="docs")d.services[i][2][j][2]=el.value;if(f==="charge")d.services[i][2][j][3]=el.value}
-   });
-   document.querySelectorAll("#adminServices [data-oi]").forEach(el=>{
-     const all=window.SmitSubOptions.read(),key=el.dataset.oi+":"+el.dataset.oj,k=+el.dataset.ok,f=el.dataset.of;
-     all[key]=all[key]||[];all[key][k]=all[key][k]||{};
-     all[key][k][f]=(f==="governmentFee"||f==="serviceCharge")?Number(el.value||0):el.value;
-     window.SmitSubOptions.write(all);
-   });
-   write(d);if($("#adminSaved"))$("#adminSaved").textContent="✓ Saved";renderAdmin();
- };
- document.querySelectorAll(".admin-tab").forEach(b=>b.onclick=()=>{
-   document.querySelectorAll(".admin-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");
-   ["services","orders","settings"].forEach(t=>{const el=$("#adminTab-"+t);if(el)el.style.display=b.dataset.tab===t?"block":"none"});
- });
- // Admin can be opened on the same URL only with ?admin=1.
- document.addEventListener("keydown",e=>{if(e.ctrlKey&&e.altKey&&e.key.toLowerCase()==="a"){location.search="?admin=1"}});
-})();
-</script></body>
+</body>
 </html>
 
 </script>
