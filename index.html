@@ -659,7 +659,31 @@ function data(){
   const htmlInv='<!doctype html><html><head><title>Invoice '+esc(o.invoiceNo)+'</title><style>body{font-family:Arial;padding:30px;color:#1f2937}.box{border:1px solid #ddd;border-radius:12px;padding:15px;margin:12px 0}table{width:100%;border-collapse:collapse}td{padding:9px;border-bottom:1px solid #eee}</style></head><body><h2>Smit Legal and Online Seva Kendra</h2><div class="box"><b>Invoice:</b> '+esc(o.invoiceNo)+'<br><b>Order ID:</b> '+esc(o.id)+'<br><b>Date:</b> '+new Date(o.createdAt).toLocaleString()+'</div><div class="box"><b>Customer:</b> '+esc(o.name)+'<br><b>WhatsApp:</b> '+esc(o.phone)+'</div><div class="box"><b>Service:</b> '+esc(o.service)+' → '+esc(o.subService)+' → '+esc(o.subOption||'')+'</div><table><tr><td>Government / Official Fee</td><td>₹'+esc(o.governmentFee)+'</td></tr><tr><td>Smit Service Charge</td><td>₹'+esc(o.serviceCharge)+'</td></tr><tr><td><b>Total</b></td><td><b>₹'+esc(o.total)+'</b></td></tr></table><div class="box"><b>Payment Status:</b> '+esc(o.paymentStatus)+'<br><b>Transaction / UTR:</b> '+esc(o.transactionId||'Pending')+'<br><b>UPI ID / Payer:</b> '+esc(o.upiId||'Not provided')+'</div><p>Thank you for choosing Smit Legal and Online Seva Kendra.</p><scr\x69pt>window.onload=function(){setTimeout(function(){window.print()},300)}<\/scr\x69pt></body></html>';
   w.document.write(htmlInv);w.document.close();
  }
- function askTrack(){const body=$('#chatBody'),en=lang()==='en';body.innerHTML='';const wrap=document.createElement('div');wrap.className='chat-msg bot';wrap.innerHTML='<div>'+(en?'Enter your Order ID:':'आपला Order ID टाका:')+'</div><input id="trackInput" class="chat-input" placeholder="e.g. SMIT-20260818-001"><button id="trackBtn" class="chat-track-btn">'+(en?'Check Status':'Status तपासा')+'</button>';body.appendChild(wrap);body.scrollTop=body.scrollHeight;$('#trackBtn').onclick=()=>{const id=$('#trackInput').value.trim().toLowerCase(),rec=orders().find(x=>(x.id||'').toLowerCase()===id)||(data().tracking||[]).find(x=>(x.id||'').toLowerCase()===id);if(rec)say('<b>Order/Tracking ID:</b> '+esc(rec.id)+'<br>📌 <b>Status:</b> '+esc(rec.status||'Updated')+'<br>💳 <b>Payment:</b> '+esc(rec.paymentStatus||'Not available')+'<br>💡 <b>Next Step:</b> '+esc(rec.solution||'Please contact us for guidance.'),[{label:'💬 WhatsApp',fn:()=>location.href=waChat('Hello, my Order ID is '+rec.id+'. Please help me with the status.')}]);else say(en?'Order ID not found. Please check the ID or contact us on WhatsApp.':'Order ID सापडला नाही. ID तपासा किंवा WhatsApp वर संपर्क करा.',[{label:'💬 WhatsApp',fn:()=>location.href=waChat('Hello, my Order ID is '+$('#trackInput').value.trim()+'. Please check and guide me.')}])}}
+ function askTrack(){
+  const body=$('#chatBody'),en=lang()==='en';
+  body.innerHTML='';
+  const wrap=document.createElement('div');
+  wrap.className='chat-msg bot';
+  wrap.innerHTML='<div>'+(en?'Enter your Order / Tracking ID:':'आपला Order / Tracking ID टाका:')+'</div><input id="trackInput" class="chat-input" placeholder="e.g. SMIT-20260818-001"><button id="trackBtn" class="chat-track-btn">'+(en?'Check Status':'Status तपासा')+'</button>';
+  body.appendChild(wrap);body.scrollTop=body.scrollHeight;
+  $('#trackBtn').onclick=()=>{
+    const id=$('#trackInput').value.trim().toLowerCase();
+    const rec=orders().find(x=>(x.id||'').toLowerCase()===id)||(data().tracking||[]).find(x=>(x.id||'').toLowerCase()===id);
+    if(rec){
+      const isOrder=typeof rec.total!=='undefined' || !!rec.invoiceNo;
+      const buttons=[{label:'💬 WhatsApp',fn:()=>location.href=waChat('Hello, my Order ID is '+rec.id+'. Please help me with the status.')}];
+      if(isOrder && rec.paymentStatus==='Payment Confirmed' && (rec.invoiceGenerated || rec.invoiceNo)){
+        buttons.unshift({label:'🧾 Download / Print Generated Invoice',fn:()=>printInvoice(rec)});
+      }
+      const invoiceLine=isOrder
+        ? '<br>🧾 <b>Invoice:</b> '+esc(rec.invoiceGenerated?'Generated — Ready to download':'Not generated yet')
+        : '';
+      say('<b>Order/Tracking ID:</b> '+esc(rec.id)+'<br>📌 <b>Status:</b> '+esc(rec.status||'Updated')+'<br>💳 <b>Payment:</b> '+esc(rec.paymentStatus||'Not available')+invoiceLine+'<br>💡 <b>Next Step:</b> '+esc(rec.solution||'Please contact us for guidance.'),buttons);
+    }else{
+      say(en?'Order / Tracking ID not found. Please check the ID or contact us on WhatsApp.':'Order / Tracking ID सापडला नाही. ID तपासा किंवा WhatsApp वर संपर्क करा.',[{label:'💬 WhatsApp',fn:()=>location.href=waChat('Hello, my Order ID is '+$('#trackInput').value.trim()+'. Please check and guide me.')}]);
+    }
+  };
+ }
  $('#chatFab').onclick=()=>{const box=$('#chatBox');const opening=!box.classList.contains('open');box.classList.toggle('open');if(opening)reset()};$('#chatClose').onclick=()=>{$('#chatBox').classList.remove('open');$('#chatBody').innerHTML=''};
  $('#smitOrderClose').onclick=()=>{$('#smitOrderModal').classList.remove('show');$('#smitOrderModal').setAttribute('aria-hidden','true')};$('#smitOrderModal').addEventListener('click',e=>{if(e.target.id==='smitOrderModal')$('#smitOrderModal').classList.remove('show')});
  window.SmitOrders={orders,saveOrders,showOrder:showOrderNoReset,printInvoice};
@@ -776,7 +800,7 @@ function renderOrders(){
   const i=a.findIndex(y=>y.id===x.id),r=document.createElement('div');r.className='admin-order-row';
   r.innerHTML=`<div><b>${esc(x.id)}</b> · ${esc(x.service)} → ${esc(x.subService)} · <b>Invoice: ${esc(x.invoiceNo||"Pending")}</b>${x.invoiceGenerated?" · ✅ Generated":""}</div>
   <div class="order-grid"><input data-oi="${i}" data-f="name" value="${esc(x.name)}"><input data-oi="${i}" data-f="phone" value="${esc(x.phone)}"><input data-oi="${i}" data-f="paymentStatus" value="${esc(x.paymentStatus)}"><input data-oi="${i}" data-f="transactionId" value="${esc(x.transactionId)}"><input data-oi="${i}" data-f="status" value="${esc(x.status)}"><textarea data-oi="${i}" data-f="solution">${esc(x.solution)}</textarea></div>
-  <div class="order-actions"><button type="button" class="secondary-btn" data-upd="${i}">💾 Update</button><button type="button" class="secondary-btn" data-conf="${i}">✅ Confirm + WhatsApp</button><button type="button" class="secondary-btn" data-owa="${i}">💬 WhatsApp</button></div>`;
+  <div class="order-actions"><button type="button" class="secondary-btn" data-upd="${i}">💾 Update</button><button type="button" class="secondary-btn" data-conf="${i}">✅ Confirm + WhatsApp</button><button type="button" class="secondary-btn" data-owa="${i}">💬 WhatsApp</button>${x.paymentStatus==='Payment Confirmed'&&x.invoiceGenerated?'<button type="button" class="secondary-btn" data-inv="'+i+'">🧾 Download / Print Invoice</button>':''}</div>`;
   wrap.appendChild(r);
  });
  wrap.querySelectorAll('[data-upd]').forEach(b=>b.onclick=()=>{
@@ -801,6 +825,10 @@ Your payment is confirmed. Your invoice has been generated. Thank you.`),'_blank
 Service: ${x.service} - ${x.subService}
 Payment: ${x.paymentStatus||'Pending'}
 Status: ${x.status||'Updated'}`),'_blank');
+ });
+ wrap.querySelectorAll('[data-inv]').forEach(b=>b.onclick=()=>{
+   const x=window.SmitOrders.orders()[+b.dataset.inv];
+   if(x && x.paymentStatus==='Payment Confirmed' && x.invoiceGenerated) window.SmitOrders.printInvoice(x);
  });
 }
 function renderTracking(){
@@ -968,12 +996,25 @@ apply();
     const box=$('#adminServiceSearchResults'),input=$('#adminServiceSearch'); if(box)box.classList.remove('show'); if(input)input.value='';
     const wrap=$('#adminServices'); if(!wrap)return;
     if(h.type==='tracking'){
-      const d=read(),idx=d.tracking.findIndex(x=>String(x.id).toLowerCase()===String(h.id).toLowerCase());
-      if(idx<0){
-        const oi=(window.SmitOrders?.orders?.()||[]).findIndex(x=>String(x.id).toLowerCase()===String(h.id).toLowerCase());
-        if(oi>=0){renderOrders();setTimeout(()=>document.querySelector('#adminOrders')?.scrollIntoView({behavior:'smooth',block:'center'}),0);} return;
+      const order=(window.SmitOrders?.orders?.()||[]).find(x=>String(x.id||'').toLowerCase()===String(h.id||'').toLowerCase());
+      if(order){
+        renderOrders();
+        setTimeout(()=>{
+          const rows=[...document.querySelectorAll('#adminOrders .admin-order-row')];
+          const row=rows.find(r=>r.textContent.includes(order.id));
+          if(row){
+            row.scrollIntoView({behavior:'smooth',block:'center'});
+            if(order.paymentStatus==='Payment Confirmed'&&order.invoiceGenerated){
+              const btn=row.querySelector('[data-inv]');
+              if(btn) btn.focus();
+            }
+          }
+        },0);
+        return;
       }
-      renderTrackingEditor(idx); return;
+      const d=read(),idx=d.tracking.findIndex(x=>String(x.id||'').toLowerCase()===String(h.id||'').toLowerCase());
+      if(idx>=0){renderTrackingEditor(idx);return;}
+      return;
     }
     wrap.dataset.selectedService=String(h.i); wrap.dataset.selectedSub=h.j===undefined?'-1':String(h.j); wrap.dataset.selectedOption=h.k===undefined?'-1':String(h.k); wrap.dataset.level=h.type==='service'?'service':h.type==='sub'?'sub':'option'; renderAdmin();
   }
